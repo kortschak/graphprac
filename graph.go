@@ -111,5 +111,32 @@ func (e *Edge) Weight() float64 { return 1 }
 // Attributes is a type to help handle DOT attributes.
 type Attributes []dot.Attribute
 
+// Get returns the value of the given attribute. If the attribute is not
+// set, the emtpy string is returned.
+func (a Attributes) Get(attr string) string {
+	for _, kv := range a {
+		if kv.Key == attr {
+			return kv.Value
+		}
+	}
+	return ""
+}
+
+// Set sets the given attribute to the specified value. If value is the empty
+// string, the attribute is unset.
+func (a *Attributes) Set(attr, value string) {
+	for i, kv := range *a {
+		if kv.Key == attr {
+			if value != "" {
+				(*a)[i].Value = value
+			} else {
+				(*a)[i], *a = (*a)[len(*a)-1], (*a)[:len(*a)-1]
+			}
+			return
+		}
+	}
+	*a = append(*a, dot.Attribute{Key: attr, Value: value})
+}
+
 // DOTAttributes returns the DOT attributes for the receiver.
 func (a Attributes) DOTAttributes() []dot.Attribute { return []dot.Attribute(a) }

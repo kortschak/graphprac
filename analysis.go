@@ -21,12 +21,14 @@ import (
 
 // PageRank performs a PageRank analysis on g using the provided damping
 // and tolerance parameters.
+//
+// The PageRank value is written into the "rank" attribute of each node.
 func PageRank(g *Graph, damp, tol float64) {
 	rank := network.PageRank(directed{g}, damp, tol)
 
 	nodes := g.NodeMap()
 	for id, w := range rank {
-		nodes[id].Attributes = []dot.Attribute{{"rank", fmt.Sprint(w)}}
+		nodes[id].Attributes.Set("rank", fmt.Sprint(w))
 	}
 }
 
@@ -38,28 +40,34 @@ func (g directed) HasEdgeFromTo(u, v graph.Node) bool { return g.HasEdgeBetween(
 func (g directed) To(n graph.Node) []graph.Node       { return g.From(n) }
 
 // Closeness performs a closeness centrality analysis on g.
+//
+// The closeness centrality value is written into the "closeness" attribute of each node.
 func Closeness(g *Graph) {
 	p := path.DijkstraAllPaths(g)
 	rank := network.Closeness(g, p)
 
 	nodes := g.NodeMap()
 	for id, w := range rank {
-		nodes[id].Attributes = []dot.Attribute{{"closeness", fmt.Sprint(w)}}
+		nodes[id].Attributes.Set("closeness", fmt.Sprint(w))
 	}
 }
 
 // Farness performs a farness centrality analysis on g.
+//
+// The farness centrality value is written into the "farness" attribute of each node.
 func Farness(g *Graph) {
 	p := path.DijkstraAllPaths(g)
 	rank := network.Farness(g, p)
 
 	nodes := g.NodeMap()
 	for id, w := range rank {
-		nodes[id].Attributes = []dot.Attribute{{"farness", fmt.Sprint(w)}}
+		nodes[id].Attributes.Set("farness", fmt.Sprint(w))
 	}
 }
 
 // Betweenness performs a betweenness centrality analysis on g.
+//
+// The betweenness centrality value is written into the "betweenness" attribute of each node.
 func Betweenness(g *Graph) {
 	rank := network.Betweenness(g)
 	nodes := g.NodeMap()
@@ -72,35 +80,43 @@ func Betweenness(g *Graph) {
 	}
 
 	for id, w := range rank {
-		nodes[id].Attributes = []dot.Attribute{{"betweenness", fmt.Sprint(w)}}
+		nodes[id].Attributes.Set("betweenness", fmt.Sprint(w))
 	}
 }
 
 // EdgeBetweenness performs an edge betweenness centrality analysis on g.
+//
+// The edge betweenness centrality value is written into the "edge_betweenness" attribute of each edge.
 func EdgeBetweenness(g *Graph) {
 	rank := network.EdgeBetweenness(g)
 
 	for ids, w := range rank {
 		e := g.EdgeBetween(simple.Node(ids[0]), simple.Node(ids[1]))
-		e.(*Edge).Attributes = []dot.Attribute{{"edge_betweenness", fmt.Sprint(w)}}
+		e.(*Edge).Attributes.Set("edge_betweenness", fmt.Sprint(w))
 	}
 }
 
 // Communities performs a community modularisation of the graph g at the
 // specified resolution.
+//
+// The community identity value is written into the "community" attribute of each node.
 func Communities(g *Graph, resolution float64) {
 	r := community.Modularize(g, resolution, nil)
 
 	nodes := g.NodeMap()
 	for i, c := range r.Communities() {
 		for _, n := range c {
-			nodes[n.ID()].Attributes = []dot.Attribute{{"community", fmt.Sprint(i)}}
+			nodes[n.ID()].Attributes.Set("community", fmt.Sprint(i))
 		}
 	}
 }
 
 // Clique performs a maximal clique analysis on g where cliques must be
 // k-cliques or larger.
+//
+// The clique membership values are written as a comma-separated list into the
+// "clique" attribute of each node and the number of cliques a node is a member of
+// is written into "clique_count".
 func Clique(g *Graph, k int) {
 	mc := topo.BronKerbosch(g)
 	var ck int
@@ -126,7 +142,7 @@ func Clique(g *Graph, k int) {
 				}
 			}
 			if !found {
-				nodes[n.ID()].Attributes = []dot.Attribute{{"clique", fmt.Sprint(i)}}
+				nodes[n.ID()].Attributes.Set("clique", fmt.Sprint(i))
 			}
 		}
 		i++
@@ -134,9 +150,7 @@ func Clique(g *Graph, k int) {
 	for _, n := range nodes {
 		for _, a := range n.Attributes {
 			if a.Key == "clique" {
-				n.Attributes = append(n.Attributes, dot.Attribute{
-					"clique_count", fmt.Sprint(len(strings.Split(a.Value, ","))),
-				})
+				n.Attributes.Set("clique_count", fmt.Sprint(len(strings.Split(a.Value, ","))))
 				break
 			}
 		}
