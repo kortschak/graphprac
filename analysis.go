@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package graphprac provides helper routines for short practical in
+// graph analysis.
 package graphprac
 
 import (
@@ -134,15 +136,18 @@ func Clique(g *Graph, k int) {
 		for _, n := range c {
 			found := false
 			attrs := nodes[n.ID()].Attributes
-			for j, a := range attrs {
-				if a.Key == "clique" {
-					attrs[j] = dot.Attribute{"clique", fmt.Sprintf("%s,%d", a.Value, i)}
-					found = true
-					break
+			if attrs.Get("clique_count") == "" {
+				for j, a := range attrs {
+					if a.Key == "clique" {
+						attrs[j] = dot.Attribute{"clique", fmt.Sprintf("%s,%d", a.Value, i)}
+						found = true
+						break
+					}
 				}
 			}
 			if !found {
 				nodes[n.ID()].Attributes.Set("clique", fmt.Sprint(i))
+				nodes[n.ID()].Attributes.Set("clique_count", "")
 			}
 		}
 		i++
