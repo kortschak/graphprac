@@ -59,8 +59,8 @@ func (g *Graph) DOTAttributers() (graph, node, edge dot.Attributer) {
 }
 
 // NodeMap returns a mapping of ID integers to nodes in the graph.
-func (g *Graph) NodeMap() map[int]*Node {
-	nodes := make(map[int]*Node)
+func (g *Graph) NodeMap() map[int64]*Node {
+	nodes := make(map[int64]*Node)
 	for _, n := range g.Nodes() {
 		nodes[n.ID()] = n.(*Node)
 	}
@@ -69,13 +69,13 @@ func (g *Graph) NodeMap() map[int]*Node {
 
 // Node is a graph node able to handle DOT attributes.
 type Node struct {
-	NodeID int
+	NodeID int64
 	Name   string
 	Attributes
 }
 
 // ID returns the ID of a node.
-func (n *Node) ID() int { return n.NodeID }
+func (n *Node) ID() int64 { return n.NodeID }
 
 // DOTID returns the node's DOT ID.
 func (n *Node) DOTID() string {
