@@ -14,7 +14,7 @@ import (
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/community"
-	"gonum.org/v1/gonum/graph/encoding/dot"
+	"gonum.org/v1/gonum/graph/encoding"
 	"gonum.org/v1/gonum/graph/network"
 	"gonum.org/v1/gonum/graph/path"
 	"gonum.org/v1/gonum/graph/simple"
@@ -30,7 +30,7 @@ func PageRank(g *Graph, damp, tol float64) {
 
 	nodes := g.NodeMap()
 	for id, w := range rank {
-		nodes[id].Attributes.Set("rank", fmt.Sprint(w))
+		nodes[id].SetAttribute(encoding.Attribute{"rank", fmt.Sprint(w)})
 	}
 }
 
@@ -50,7 +50,7 @@ func Closeness(g *Graph) {
 
 	nodes := g.NodeMap()
 	for id, w := range rank {
-		nodes[id].Attributes.Set("closeness", fmt.Sprint(w))
+		nodes[id].SetAttribute(encoding.Attribute{"closeness", fmt.Sprint(w)})
 	}
 }
 
@@ -63,7 +63,7 @@ func Farness(g *Graph) {
 
 	nodes := g.NodeMap()
 	for id, w := range rank {
-		nodes[id].Attributes.Set("farness", fmt.Sprint(w))
+		nodes[id].SetAttribute(encoding.Attribute{"farness", fmt.Sprint(w)})
 	}
 }
 
@@ -82,7 +82,7 @@ func Betweenness(g *Graph) {
 	}
 
 	for id, w := range rank {
-		nodes[id].Attributes.Set("betweenness", fmt.Sprint(w))
+		nodes[id].SetAttribute(encoding.Attribute{"betweenness", fmt.Sprint(w)})
 	}
 }
 
@@ -94,7 +94,7 @@ func EdgeBetweenness(g *Graph) {
 
 	for ids, w := range rank {
 		e := g.EdgeBetween(simple.Node(ids[0]), simple.Node(ids[1]))
-		e.(*Edge).Attributes.Set("edge_betweenness", fmt.Sprint(w))
+		e.(*Edge).SetAttribute(encoding.Attribute{"edge_betweenness", fmt.Sprint(w)})
 	}
 }
 
@@ -108,7 +108,7 @@ func Communities(g *Graph, resolution float64) {
 	nodes := g.NodeMap()
 	for i, c := range r.Communities() {
 		for _, n := range c {
-			nodes[n.ID()].Attributes.Set("community", fmt.Sprint(i))
+			nodes[n.ID()].SetAttribute(encoding.Attribute{"community", fmt.Sprint(i)})
 		}
 	}
 }
@@ -139,15 +139,15 @@ func Clique(g *Graph, k int) {
 			if attrs.Get("clique_count") == "" {
 				for j, a := range attrs {
 					if a.Key == "clique" {
-						attrs[j] = dot.Attribute{"clique", fmt.Sprintf("%s,%d", a.Value, i)}
+						attrs[j] = encoding.Attribute{"clique", fmt.Sprintf("%s,%d", a.Value, i)}
 						found = true
 						break
 					}
 				}
 			}
 			if !found {
-				nodes[n.ID()].Attributes.Set("clique", fmt.Sprint(i))
-				nodes[n.ID()].Attributes.Set("clique_count", "")
+				nodes[n.ID()].SetAttribute(encoding.Attribute{"clique", fmt.Sprint(i)})
+				nodes[n.ID()].SetAttribute(encoding.Attribute{"clique_count", ""})
 			}
 		}
 		i++
@@ -155,7 +155,7 @@ func Clique(g *Graph, k int) {
 	for _, n := range nodes {
 		for _, a := range n.Attributes {
 			if a.Key == "clique" {
-				n.Attributes.Set("clique_count", fmt.Sprint(len(strings.Split(a.Value, ","))))
+				n.SetAttribute(encoding.Attribute{"clique_count", fmt.Sprint(len(strings.Split(a.Value, ",")))})
 				break
 			}
 		}

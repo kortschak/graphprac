@@ -8,11 +8,12 @@ import (
 	"io/ioutil"
 
 	"gonum.org/v1/gonum/graph"
+	"gonum.org/v1/gonum/graph/encoding"
 	"gonum.org/v1/gonum/graph/encoding/dot"
 	"gonum.org/v1/gonum/graph/simple"
 )
 
-// Graph is a general unidrected graph with node and edge attributes.
+// Graph is a general undirected graph with node and edge attributes.
 type Graph struct {
 	*simple.UndirectedGraph
 	GraphAttrs, NodeAttrs, EdgeAttrs Attributes
@@ -25,7 +26,7 @@ func NewGraph(file string) (*Graph, error) {
 		return nil, err
 	}
 
-	g := &Graph{UndirectedGraph: simple.NewUndirectedGraph(0, 0)}
+	g := &Graph{UndirectedGraph: simple.NewUndirectedGraph()}
 
 	err = dot.Unmarshal(b, g)
 	if err != nil {
@@ -37,9 +38,7 @@ func NewGraph(file string) (*Graph, error) {
 
 // NewNode adds a new node with a unique node ID to the graph.
 func (g *Graph) NewNode() graph.Node {
-	n := &Node{NodeID: g.NewNodeID()}
-	g.AddNode(n)
-	return n
+	return &Node{NodeID: g.UndirectedGraph.NewNode().ID()}
 }
 
 // NewEdge adds a new edge from the source to the destination node to the graph,
@@ -54,7 +53,7 @@ func (g *Graph) NewEdge(from, to graph.Node) graph.Edge {
 }
 
 // DOTAttributers returns the global DOT attributes for the graph.
-func (g *Graph) DOTAttributers() (graph, node, edge dot.Attributer) {
+func (g *Graph) DOTAttributers() (graph, node, edge encoding.Attributer) {
 	return g.GraphAttrs, g.NodeAttrs, g.EdgeAttrs
 }
 
@@ -82,13 +81,13 @@ func (n *Node) DOTID() string {
 	return n.Name
 }
 
-// UnmarshalDOTID decodes a DOT ID.
-func (n *Node) UnmarshalDOTID(id string) {
+// SetDOTID sets the node's DOT ID.
+func (n *Node) SetDOTID(id string) {
 	n.Name = id
 }
 
-// UnmarshalDOTAttr decodes a single DOT attribute.
-func (n *Node) UnmarshalDOTAttr(attr dot.Attribute) error {
+// SetAttribute sets a single DOT attribute.
+func (n *Node) SetAttribute(attr encoding.Attribute) error {
 	n.Attributes = append(n.Attributes, attr)
 	return nil
 }
@@ -105,11 +104,8 @@ func (e *Edge) From() graph.Node { return e.F }
 // To returns the 'to' node of an edge.
 func (e *Edge) To() graph.Node { return e.T }
 
-// Weight returns the weight of an edge. This is always 1 for this type.
-func (e *Edge) Weight() float64 { return 1 }
-
 // Attributes is a type to help handle DOT attributes.
-type Attributes []dot.Attribute
+type Attributes []encoding.Attribute
 
 // Get returns the value of the given attribute. If the attribute is not
 // set, the emtpy string is returned.
@@ -122,21 +118,26 @@ func (a Attributes) Get(attr string) string {
 	return ""
 }
 
-// Set sets the given attribute to the specified value. If value is the empty
-// string, the attribute is unset.
-func (a *Attributes) Set(attr, value string) {
+// Attributes returns the complete list of attributes.
+func (a Attributes) Attributes() []encoding.Attribute {
+	return a
+}
+
+// Set sets the given attribute to the specified value. If the attr Value
+// field is the empty string, the attribute is unset.
+func (a *Attributes) SetAttribute(attr encoding.Attribute) {
 	for i, kv := range *a {
-		if kv.Key == attr {
-			if value != "" {
-				(*a)[i].Value = value
+		if kv.Key == attr.Key {
+			if attr.Value != "" {
+				(*a)[i].Value = attr.Value
 			} else {
 				(*a)[i], *a = (*a)[len(*a)-1], (*a)[:len(*a)-1]
 			}
 			return
 		}
 	}
-	*a = append(*a, dot.Attribute{Key: attr, Value: value})
+	*a = append(*a, attr)
 }
 
 // DOTAttributes returns the DOT attributes for the receiver.
-func (a Attributes) DOTAttributes() []dot.Attribute { return []dot.Attribute(a) }
+func (a Attributes) DOTAttributes() []encoding.Attribute { return []encoding.Attribute(a) }
