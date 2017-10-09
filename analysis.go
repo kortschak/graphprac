@@ -162,8 +162,21 @@ func Clique(g *Graph, k int) {
 	}
 }
 
+// NodesOf returns the nodes in g asserted to be type graphprac.Node so
+// that attributes can be accessed.
+//
+//  nodes := graphprac.NodesOf(g)
+//  fmt.Println(nodes[i].Attributes.Get(attr))
+func NodesOf(g *Graph) []*Node {
+	var nodes []*Node
+	for _, n := range g.Nodes() {
+		nodes = append(nodes, n)
+	}
+	return nodes
+}
+
 // NodesByAttribute return a slice of nodes sorted descending by the
-// given attribute.
+// given attribute. Only float64 attributes are handled by this function.
 func NodesByAttribute(attr string, g *Graph) ([]*Node, error) {
 	var nodes []*Node
 	var vals []float64
