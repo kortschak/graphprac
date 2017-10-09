@@ -170,7 +170,7 @@ func Clique(g *Graph, k int) {
 func NodesOf(g *Graph) []*Node {
 	var nodes []*Node
 	for _, n := range g.Nodes() {
-		nodes = append(nodes, n)
+		nodes = append(nodes, n.(*Node))
 	}
 	return nodes
 }
