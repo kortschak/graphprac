@@ -86,12 +86,6 @@ func (n *Node) SetDOTID(id string) {
 	n.Name = id
 }
 
-// SetAttribute sets a single DOT attribute.
-func (n *Node) SetAttribute(attr encoding.Attribute) error {
-	n.Attributes = append(n.Attributes, attr)
-	return nil
-}
-
 // Edge is a graph edge able to handle DOT attributes.
 type Edge struct {
 	F, T *Node
