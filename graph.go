@@ -102,7 +102,7 @@ func (e *Edge) To() graph.Node { return e.T }
 type Attributes []encoding.Attribute
 
 // Get returns the value of the given attribute. If the attribute is not
-// set, the emtpy string is returned.
+// set, the empty string is returned.
 func (a Attributes) Get(attr string) string {
 	for _, kv := range a {
 		if kv.Key == attr {
@@ -119,7 +119,7 @@ func (a Attributes) Attributes() []encoding.Attribute {
 
 // Set sets the given attribute to the specified value. If the attr Value
 // field is the empty string, the attribute is unset.
-func (a *Attributes) SetAttribute(attr encoding.Attribute) {
+func (a *Attributes) SetAttribute(attr encoding.Attribute) error {
 	for i, kv := range *a {
 		if kv.Key == attr.Key {
 			if attr.Value != "" {
@@ -127,10 +127,11 @@ func (a *Attributes) SetAttribute(attr encoding.Attribute) {
 			} else {
 				(*a)[i], *a = (*a)[len(*a)-1], (*a)[:len(*a)-1]
 			}
-			return
+			return nil
 		}
 	}
 	*a = append(*a, attr)
+	return nil
 }
 
 // DOTAttributes returns the DOT attributes for the receiver.
