@@ -17,7 +17,6 @@ import (
 	"gonum.org/v1/gonum/graph/encoding"
 	"gonum.org/v1/gonum/graph/network"
 	"gonum.org/v1/gonum/graph/path"
-	"gonum.org/v1/gonum/graph/simple"
 	"gonum.org/v1/gonum/graph/topo"
 )
 
@@ -38,8 +37,8 @@ type directed struct {
 	*Graph
 }
 
-func (g directed) HasEdgeFromTo(u, v graph.Node) bool { return g.HasEdgeBetween(u, v) }
-func (g directed) To(n graph.Node) []graph.Node       { return g.From(n) }
+func (g directed) HasEdgeFromTo(uid, vid int64) bool { return g.HasEdgeBetween(uid, vid) }
+func (g directed) To(id int64) []graph.Node          { return g.From(id) }
 
 // Closeness performs a closeness centrality analysis on g.
 //
@@ -93,7 +92,7 @@ func EdgeBetweenness(g *Graph) {
 	rank := network.EdgeBetweenness(g)
 
 	for ids, w := range rank {
-		e := g.EdgeBetween(simple.Node(ids[0]), simple.Node(ids[1]))
+		e := g.EdgeBetween(ids[0], ids[1])
 		e.(*Edge).SetAttribute(encoding.Attribute{"edge_betweenness", fmt.Sprint(w)})
 	}
 }

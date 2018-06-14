@@ -44,7 +44,7 @@ func (g *Graph) NewNode() graph.Node {
 // NewEdge adds a new edge from the source to the destination node to the graph,
 // or returns the existing edge if already present.
 func (g *Graph) NewEdge(from, to graph.Node) graph.Edge {
-	if e := g.Edge(from, to); e != nil {
+	if e := g.Edge(from.ID(), to.ID()); e != nil {
 		return e
 	}
 	e := &Edge{F: from.(*Node), T: to.(*Node)}
