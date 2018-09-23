@@ -60,7 +60,7 @@ func (g *Graph) DOTAttributers() (graph, node, edge encoding.Attributer) {
 // NodeMap returns a mapping of ID integers to nodes in the graph.
 func (g *Graph) NodeMap() map[int64]*Node {
 	nodes := make(map[int64]*Node)
-	for _, n := range g.Nodes() {
+	for _, n := range graph.NodesOf(g.Nodes()) {
 		nodes[n.ID()] = n.(*Node)
 	}
 	return nodes

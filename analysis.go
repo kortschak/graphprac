@@ -38,7 +38,7 @@ type directed struct {
 }
 
 func (g directed) HasEdgeFromTo(uid, vid int64) bool { return g.HasEdgeBetween(uid, vid) }
-func (g directed) To(id int64) []graph.Node          { return g.From(id) }
+func (g directed) To(id int64) graph.Nodes           { return g.From(id) }
 
 // Closeness performs a closeness centrality analysis on g.
 //
@@ -168,7 +168,7 @@ func Clique(g *Graph, k int) {
 //  fmt.Println(nodes[i].Attributes.Get(attr))
 func NodesOf(g *Graph) []*Node {
 	var nodes []*Node
-	for _, n := range g.Nodes() {
+	for _, n := range graph.NodesOf(g.Nodes()) {
 		nodes = append(nodes, n.(*Node))
 	}
 	return nodes
@@ -179,7 +179,7 @@ func NodesOf(g *Graph) []*Node {
 func NodesByAttribute(attr string, g *Graph) ([]*Node, error) {
 	var nodes []*Node
 	var vals []float64
-	for _, n := range g.Nodes() {
+	for _, n := range graph.NodesOf(g.Nodes()) {
 		n := n.(*Node)
 		var v float64
 		var err error
@@ -216,7 +216,7 @@ func (a nodesByAttr) Swap(i, j int) {
 func EdgesByAttribute(attr string, g *Graph) ([]*Edge, error) {
 	var edges []*Edge
 	var vals []float64
-	for _, n := range g.Edges() {
+	for _, n := range graph.EdgesOf(g.Edges()) {
 		n := n.(*Edge)
 		var v float64
 		var err error
