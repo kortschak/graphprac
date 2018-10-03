@@ -6,6 +6,9 @@ The tutorial uses the gophernotes Jupyter kernel; you must have this running.
 If gophernotes is not installed, see [here](https://github.com/gopherdata/gophernotes#linux).
 If Jupyter is not installed run `pip3 install jupyter`.
 
+GraphViz commands are needed to perform graph visualisation.
+If these are not installed run, e.g. `sudo apt install graphviz`.
+
 Start the notebook by running `jupyter notebook`.
 
 To start the tutorial, open [this link](http://localhost:8888/terminals/1) in a new tab and execute the following command at the prompt:
