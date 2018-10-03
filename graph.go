@@ -5,11 +5,16 @@
 package graphprac
 
 import (
+	"bytes"
+	"fmt"
 	"io/ioutil"
+	"os/exec"
+	"strings"
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/encoding"
 	"gonum.org/v1/gonum/graph/encoding/dot"
+	"gonum.org/v1/gonum/graph/iterator"
 	"gonum.org/v1/gonum/graph/simple"
 )
 
@@ -136,3 +141,109 @@ func (a *Attributes) SetAttribute(attr encoding.Attribute) error {
 
 // DOTAttributes returns the DOT attributes for the receiver.
 func (a Attributes) DOTAttributes() []encoding.Attribute { return []encoding.Attribute(a) }
+
+// Induce returns a subgraph based on g that contains only the nodes in by,
+// and edges that have both ends in by.
+func Induce(g *Graph, by []*Node) graph.Graph {
+	i := nodeInducedGraph{
+		Graph: g,
+		nodes: make(map[int64]bool, len(by)),
+	}
+	for _, n := range by {
+		i.nodes[n.ID()] = true
+	}
+	return i
+}
+
+type nodeInducedGraph struct {
+	*Graph
+	nodes map[int64]bool
+}
+
+func (g nodeInducedGraph) Node(id int64) graph.Node {
+	if !g.nodes[id] {
+		return nil
+	}
+	return g.Graph.Node(id)
+}
+
+func (g nodeInducedGraph) Nodes() graph.Nodes {
+	n := graph.NodesOf(g.Graph.Nodes())
+	for i := 0; i < len(n); {
+		if !g.nodes[n[i].ID()] {
+			n[i], n = n[len(n)-1], n[:len(n)-1]
+		} else {
+			i++
+		}
+	}
+	return iterator.NewOrderedNodes(n)
+}
+
+func (g nodeInducedGraph) Edges() graph.Edges {
+	e := graph.EdgesOf(g.Graph.Edges())
+	for i := 0; i < len(e); {
+		if !g.nodes[e[i].From().ID()] || !g.nodes[e[i].To().ID()] {
+			e[i], e = e[len(e)-1], e[:len(e)-1]
+		} else {
+			i++
+		}
+	}
+	return iterator.NewOrderedEdges(e)
+}
+
+func (g nodeInducedGraph) From(id int64) graph.Nodes {
+	n := graph.NodesOf(g.Graph.From(id))
+	for i := 0; i < len(n); {
+		if !g.nodes[n[i].ID()] {
+			n[i], n = n[len(n)-1], n[:len(n)-1]
+		} else {
+			i++
+		}
+	}
+	return iterator.NewOrderedNodes(n)
+}
+
+func (g nodeInducedGraph) HasEdgeBetween(xid, yid int64) bool {
+	if !g.nodes[xid] || !g.nodes[yid] {
+		return false
+	}
+	return g.Graph.HasEdgeBetween(xid, yid)
+}
+
+func (g nodeInducedGraph) Edge(uid, vid int64) graph.Edge {
+	return g.EdgeBetween(uid, vid)
+}
+
+func (g nodeInducedGraph) EdgeBetween(xid, yid int64) graph.Edge {
+	if !g.nodes[xid] || !g.nodes[yid] {
+		return nil
+	}
+	return g.Graph.EdgeBetween(xid, yid)
+}
+
+// DOT renders the graph as a DOT language representation.
+func DOT(g graph.Graph) string {
+	b, _ := dot.Marshal(g, "", "", "  ", false)
+	return string(b)
+}
+
+// Draw renders the graph as an SVG using the GraphViz command in format.
+// The format parameter can be one of "dot", "neato", "fdp" and "sfdp".
+// See https://www.graphviz.org/ for a description of these commands.
+func Draw(g graph.Graph, format string) (string, error) {
+	switch format {
+	case "dot", "neato", "fdp", "sfdp":
+	default:
+		return "", fmt.Errorf("invalid format: %q", format)
+	}
+	path, err := exec.LookPath(format)
+	if err != nil {
+		return "", err
+	}
+	cmd := exec.Command(path, "-Tsvg")
+	cmd.Stdin = strings.NewReader(DOT(g))
+	var buf bytes.Buffer
+	cmd.Stdout = &buf
+	err = cmd.Run()
+	return buf.String(), err
+}
