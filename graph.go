@@ -240,7 +240,7 @@ func Draw(g graph.Graph, format string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	cmd := exec.Command(path, "-Tsvg")
+	cmd := exec.Command(path, "-Tsvg", "-Gsize=10!")
 	cmd.Stdin = strings.NewReader(DOT(g))
 	var buf bytes.Buffer
 	cmd.Stdout = &buf
