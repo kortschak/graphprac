@@ -223,7 +223,7 @@ func (g nodeInducedGraph) EdgeBetween(xid, yid int64) graph.Edge {
 
 // DOT renders the graph as a DOT language representation.
 func DOT(g graph.Graph) string {
-	b, _ := dot.Marshal(g, "", "", "  ", false)
+	b, _ := dot.Marshal(g, "", "", "  ")
 	return string(b)
 }
 
