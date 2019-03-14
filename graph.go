@@ -103,6 +103,10 @@ func (e *Edge) From() graph.Node { return e.F }
 // To returns the 'to' node of an edge.
 func (e *Edge) To() graph.Node { return e.T }
 
+// ReversedEdge returns a copy of the edge with the 'from' and 'to'
+// nodes swapped.
+func (e *Edge) ReversedEdge() graph.Edge { e.F, e.T = e.T, e.F; return e }
+
 // Attributes is a type to help handle DOT attributes.
 type Attributes []encoding.Attribute
 
@@ -223,7 +227,7 @@ func (g nodeInducedGraph) EdgeBetween(xid, yid int64) graph.Edge {
 
 // DOT renders the graph as a DOT language representation.
 func DOT(g graph.Graph) string {
-	b, _ := dot.Marshal(g, "", "", "  ", false)
+	b, _ := dot.Marshal(g, "", "", "  ")
 	return string(b)
 }
 
