@@ -16,6 +16,7 @@ import (
 	"strings"
 
 	"gonum.org/v1/gonum/graph"
+	"gonum.org/v1/gonum/graph/encoding"
 	"gonum.org/v1/gonum/graph/encoding/dot"
 	"gonum.org/v1/gonum/graph/simple"
 )
@@ -26,10 +27,10 @@ type node struct {
 	desc string
 }
 
-func (n node) ID() int       { return n.id }
+func (n node) ID() int64     { return int64(n.id) }
 func (n node) DOTID() string { return `"` + n.name + `"` }
-func (n node) DOTAttributes() []dot.Attribute {
-	return []dot.Attribute{{Key: "desc", Value: `"` + n.desc + `"`}}
+func (n node) DOTAttributes() []encoding.Attribute {
+	return []encoding.Attribute{{Key: "desc", Value: `"` + n.desc + `"`}}
 }
 
 const (
@@ -112,7 +113,7 @@ func parsenet(r io.Reader, g graph.UndirectedBuilder) (graph.Undirected, string,
 			if from == to {
 				continue
 			}
-			g.SetEdge(simple.Edge{F: nodes[from], T: nodes[to], W: 1})
+			g.SetEdge(simple.Edge{F: nodes[from], T: nodes[to]})
 		default:
 			panic("cannot reach")
 		}
@@ -125,11 +126,11 @@ func parsenet(r io.Reader, g graph.UndirectedBuilder) (graph.Undirected, string,
 }
 
 func main() {
-	g, name, err := parsenet(os.Stdin, simple.NewUndirectedGraph(0, 0))
+	g, name, err := parsenet(os.Stdin, simple.NewUndirectedGraph())
 	if err != nil {
 		log.Fatalf("failed parse net file: %v", err)
 	}
-	b, err := dot.Marshal(g, name, "", "  ", false)
+	b, err := dot.Marshal(g, name, "", "  ")
 	if err != nil {
 		log.Fatalf("failed marshal graph: %v", err)
 	}
