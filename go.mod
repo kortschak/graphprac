@@ -1,4 +1,4 @@
-module graphprac
+module github.com/kortschak/graphprac
 
 go 1.13
 
