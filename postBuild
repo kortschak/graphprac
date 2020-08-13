@@ -2,9 +2,9 @@
 
 # https://github.com/gopherdata/mybinder-go/blob/master/LICENSE.md
 
-set -e
+set -ex
 
-GOVERS=1.13
+GOVERS=1.14
 
 mkdir -p \
 	$HOME/.local/go/$GOVERS \
@@ -15,6 +15,7 @@ curl -O -L https://golang.org/dl/go${GOVERS}.linux-amd64.tar.gz
 tar -C $HOME/.local/go/$GOVERS -zxf go${GOVERS}.linux-amd64.tar.gz
 /bin/rm go${GOVERS}.linux-amd64.tar.gz
 
+export GO111MODULE=on
 export GOROOT=$HOME/.local/go/$GOVERS/go
 export GOPATH=$HOME/go
 export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
@@ -22,7 +23,8 @@ export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 ## install needed packages
 echo "::: installing gophernotes, gonum and graphprac..."
 go get golang.org/x/tools/cmd/goimports
-go get -v github.com/gopherdata/gophernotes
+go get github.com/gopherdata/gophernotes@v0.7.1
+go get gonum.org/v1/gonum@v0.7.0
 go get gonum.org/v1/gonum/...
 go get github.com/kortschak/graphprac
 echo "::: installing gophernotes, gonum and graphprac... [done]"
@@ -41,6 +43,7 @@ EOF
 
 ## install the Go kernel
 mkdir -p ./binder/gophernotes
+cp $(go env GOPATH)/pkg/mod/github.com/gopherdata/gophernotes@v0.7.1/kernel/*  .
 cat >| ./binder/gophernotes/kernel.json << EOF
 {
     "argv": [
@@ -54,10 +57,11 @@ cat >| ./binder/gophernotes/kernel.json << EOF
         "GOPATH": "$GOPATH",
         "GOROOT": "$GOROOT",
         "PATH":   "$GOPATH/bin:$GOROOT/bin:$PATH"
-	}
+       }
 }
 EOF
-jupyter kernelspec install ./binder/gophernotes --user
+
+jupyter kernelspec install binder/gophernotes --user
 
 /bin/rm -rf binder
 
