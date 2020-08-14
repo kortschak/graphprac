@@ -5,6 +5,8 @@
 set -ex
 
 GOVERS=1.14
+GONUMVERS=v0.7.0
+GOPHERNOTESVERS=v0.7.1
 
 mkdir -p \
 	$HOME/.local/go/$GOVERS \
@@ -13,7 +15,7 @@ mkdir -p \
 echo "::: install Go ${GOVERS}..."
 curl -O -L https://golang.org/dl/go${GOVERS}.linux-amd64.tar.gz
 tar -C $HOME/.local/go/$GOVERS -zxf go${GOVERS}.linux-amd64.tar.gz
-/bin/rm go${GOVERS}.linux-amd64.tar.gz
+rm go${GOVERS}.linux-amd64.tar.gz
 
 export GO111MODULE=on
 export GOROOT=$HOME/.local/go/$GOVERS/go
@@ -23,28 +25,16 @@ export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 ## install needed packages
 echo "::: installing gophernotes, gonum and graphprac..."
 go get golang.org/x/tools/cmd/goimports
-go get github.com/gopherdata/gophernotes@v0.7.1
-go get gonum.org/v1/gonum@v0.7.0
+go get github.com/gopherdata/gophernotes@${GOPHERNOTESVERS}
+go get gonum.org/v1/gonum@${GONUMVERS}
 go get gonum.org/v1/gonum/...
 go get github.com/kortschak/graphprac
 echo "::: installing gophernotes, gonum and graphprac... [done]"
 
-## setup environment for Go
-cat >> $HOME/.setup-go << EOF
-## setup Go
-export GOROOT=$GOROOT
-export GOPATH=$GOPATH
-export PATH=\$GOPATH/bin:\$GOROOT/bin:\$PATH
-EOF
-
-cat >> $HOME/.bashrc << EOF
-. ~/.setup-go
-EOF
-
 ## install the Go kernel
-mkdir -p ./binder/gophernotes
-cp $(go env GOPATH)/pkg/mod/github.com/gopherdata/gophernotes@v0.7.1/kernel/*  .
-cat >| ./binder/gophernotes/kernel.json << EOF
+mkdir -p binder/gophernotes
+cp $(go env GOPATH)/pkg/mod/github.com/gopherdata/gophernotes@${GOPHERNOTESVERS}/kernel/*.png binder/gophernotes
+cat >binder/gophernotes/kernel.json <<EOF
 {
     "argv": [
         "$GOPATH/bin/gophernotes",
@@ -57,13 +47,13 @@ cat >| ./binder/gophernotes/kernel.json << EOF
         "GOPATH": "$GOPATH",
         "GOROOT": "$GOROOT",
         "PATH":   "$GOPATH/bin:$GOROOT/bin:$PATH"
-       }
+    }
 }
 EOF
 
 jupyter kernelspec install binder/gophernotes --user
 
-/bin/rm -rf binder
+rm -rf binder
 
 echo "::: kernel list"
 jupyter kernelspec list
